@@ -24,17 +24,18 @@ import Foundation
 import CommonCrypto
 
 public enum Algorithm {
+    
     case md5, sha1, sha224, sha256, sha384, sha512
 
     fileprivate var hmacAlgorithm: CCHmacAlgorithm {
         var result: Int = 0
         switch self {
-        case .md5:		result = kCCHmacAlgMD5
-        case .sha1:		result = kCCHmacAlgSHA1
-        case .sha224:	result = kCCHmacAlgSHA224
-        case .sha256:	result = kCCHmacAlgSHA256
-        case .sha384:	result = kCCHmacAlgSHA384
-        case .sha512:	result = kCCHmacAlgSHA512
+        case .md5:      result = kCCHmacAlgMD5
+        case .sha1:     result = kCCHmacAlgSHA1
+        case .sha224:   result = kCCHmacAlgSHA224
+        case .sha256:   result = kCCHmacAlgSHA256
+        case .sha384:   result = kCCHmacAlgSHA384
+        case .sha512:   result = kCCHmacAlgSHA512
         }
         return CCHmacAlgorithm(result)
     }
@@ -55,19 +56,22 @@ public enum Algorithm {
     public var digestLength: Int {
         var result: Int32 = 0
         switch self {
-        case .md5:		result = CC_MD5_DIGEST_LENGTH
-        case .sha1:		result = CC_SHA1_DIGEST_LENGTH
-        case .sha224:	result = CC_SHA224_DIGEST_LENGTH
-        case .sha256:	result = CC_SHA256_DIGEST_LENGTH
-        case .sha384:	result = CC_SHA384_DIGEST_LENGTH
-        case .sha512:	result = CC_SHA512_DIGEST_LENGTH
+        case .md5:      result = CC_MD5_DIGEST_LENGTH
+        case .sha1:     result = CC_SHA1_DIGEST_LENGTH
+        case .sha224:   result = CC_SHA224_DIGEST_LENGTH
+        case .sha256:   result = CC_SHA256_DIGEST_LENGTH
+        case .sha384:   result = CC_SHA384_DIGEST_LENGTH
+        case .sha512:   result = CC_SHA512_DIGEST_LENGTH
         }
         return Int(result)
     }
+    
 }
 
 public protocol Hashable {
+    
     associatedtype Hash
+    
     func digest(_ algorithm: Algorithm, key: String?) -> Hash
 
     var md5: Hash { get }
@@ -76,6 +80,7 @@ public protocol Hashable {
     var sha256: Hash { get }
     var sha384: Hash { get }
     var sha512: Hash { get }
+    
 }
 
 extension Hashable {
@@ -103,20 +108,16 @@ extension Hashable {
     public var sha512: Hash {
         return digest(.sha512, key: nil)
     }
-
+    
 }
 
 extension String: Hashable {
-
-    public func digest(_ algorithm: Algorithm) -> String {
-        return digest(algorithm, key: Optional<Data>.none)
-    }
 
     public func digest(_ algorithm: Algorithm, key: String?) -> String {
         return digest(algorithm, key: key?.data(using: .utf8))
     }
 
-    public func digest(_ algorithm: Algorithm, key: Data?) -> String {
+    public func digest(_ algorithm: Algorithm, key: Data? = nil) -> String {
         let str = Array(self.utf8CString)
         let strLen = str.count-1
         let digestLen = algorithm.digestLength
@@ -136,20 +137,16 @@ extension String: Hashable {
 
         return digest
     }
-
+    
 }
 
 extension Data: Hashable {
-
-    public func digest(_ algorithm: Algorithm) -> Data {
-        return digest(algorithm, key: Optional<Data>.none)
-    }
 
     public func digest(_ algorithm: Algorithm, key: String?) -> Data {
         return digest(algorithm, key: key?.data(using: .utf8))
     }
 
-    public func digest(_ algorithm: Algorithm, key: Data?) -> Data {
+    public func digest(_ algorithm: Algorithm, key: Data? = nil) -> Data {
         let count = self.count
         let digestLen = algorithm.digestLength
 
@@ -172,11 +169,11 @@ extension Data: Hashable {
             return Data(bytes: result, count: digestLen)
         }
     }
-
+    
 }
 
 private extension UnsafeMutablePointer where Pointee == CUnsignedChar {
-
+    
     func toHexString(count: Int) -> String {
         var result = String()
         for i in 0..<count {
@@ -189,5 +186,5 @@ private extension UnsafeMutablePointer where Pointee == CUnsignedChar {
         }
         return result
     }
-
+    
 }
